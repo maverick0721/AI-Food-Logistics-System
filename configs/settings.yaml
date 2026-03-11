@@ -2,10 +2,9 @@ city: "Roorkee"
 
 simulator:
   drivers: 200
-  restaurants: 120
-  customers: 5000
+  restaurants: 100
+  customers: 3000
 
-training:
-  batch_size: 4096
-  learning_rate: 0.0003
-  gamma: 0.99
+traffic:
+  morning_peak: [8,10]
+  evening_peak: [17,20]

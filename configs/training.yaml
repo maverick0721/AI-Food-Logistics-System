@@ -1,0 +1,11 @@
+training:
+
+  batch_size: 4096
+  learning_rate: 0.0003
+  gamma: 0.99
+  epochs: 10
+
+rl:
+
+  algorithm: PPO
+  horizon: 1024
