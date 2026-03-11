@@ -1,0 +1,1 @@
+python -m mega_simulator.run_simulation
