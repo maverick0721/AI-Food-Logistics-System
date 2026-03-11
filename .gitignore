@@ -22,3 +22,5 @@ build/
 *.zip
 *.tar.gz
 *.egg-info/
+datasets/raw/
+datasets/processed/
