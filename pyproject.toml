@@ -1,0 +1,48 @@
+[project]
+name = "ai-food-logistics"
+version = "0.1.0"
+description = "AI logistics platform for food delivery optimization"
+
+dependencies = [
+    "torch",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "networkx",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "redis",
+    "kafka-python",
+    "ray[rllib]",
+    "dgl",
+    "xgboost",
+    "osmnx",
+    "pyarrow",
+    "wandb",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "backend*",
+    "data_pipeline*",
+    "evaluation*",
+    "graph_engine*",
+    "llm_agent*",
+    "mega_simulator*",
+    "ml_models*",
+    "rl_dispatch*",
+    "self_learning*",
+    "utils*",
+]
+exclude = [
+    "benchmarks*",
+    "configs*",
+    "datasets*",
+    "docs*",
+    "experiments*",
+    "frontend*",
+    "infra*",
+    "scripts*",
+    "tests*",
+]
