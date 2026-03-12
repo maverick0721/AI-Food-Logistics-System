@@ -26,3 +26,10 @@ datasets/raw/
 datasets/processed/
 models/*.pt
 rl_dispatch/models/*.pt
+.ipynb_checkpoints/
+infra/kafka/kafka_2.13-2.8.0.tgz
+infra/kafka/*.tgz
+infra/kafka/current/
+infra/kafka/*.log
+*.tar
+*.gz
