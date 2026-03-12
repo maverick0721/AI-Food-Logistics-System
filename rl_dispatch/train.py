@@ -46,6 +46,10 @@ def train():
 
         print("Episode", episode, "Reward", total_reward)
 
+    torch.save(model.state_dict(), "models/dispatch_agent.pt")
+
+    print("Model saved to models/dispatch_agent.pt")
+
 
 if __name__ == "__main__":
 
