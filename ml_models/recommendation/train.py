@@ -1,14 +1,17 @@
+import os
 import torch
 from torch.utils.data import DataLoader
 
 from ml_models.recommendation.dataset import RecommendationDataset
 from ml_models.recommendation.model import TwoTowerModel
 
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def train():
 
     dataset = RecommendationDataset(
-        "datasets/raw/recommendation_data.parquet"
+        os.path.join(ROOT_DIR, "datasets", "raw", "recommendation_data.parquet")
     )
 
     loader = DataLoader(dataset, batch_size=256, shuffle=True)
@@ -39,7 +42,8 @@ def train():
 
         print("Epoch", epoch, "Loss", total_loss)
 
-    torch.save(model.state_dict(), "models/recommendation_model.pt")
+    os.makedirs(os.path.join(ROOT_DIR, "models"), exist_ok=True)
+    torch.save(model.state_dict(), os.path.join(ROOT_DIR, "models", "recommendation_model.pt"))
 
     print("Model saved")
 
