@@ -24,4 +24,5 @@ build/
 *.egg-info/
 datasets/raw/
 datasets/processed/
-models/
+models/*.pt
+rl_dispatch/models/*.pt
