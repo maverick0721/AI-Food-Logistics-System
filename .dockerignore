@@ -1,0 +1,17 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+.env
+.DS_Store
+datasets/
+models/
+logs/
+.pytest_cache/
+infra/kafka/current/
+infra/kafka/*.tgz
+infra/kafka/*.log
+frontend/node_modules/
+node_modules/
