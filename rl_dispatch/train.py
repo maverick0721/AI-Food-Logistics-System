@@ -1,4 +1,7 @@
+import os
+
 import torch
+import torch.distributions as dist
 import numpy as np
 
 from rl_dispatch.environment import DispatchEnvironment
@@ -18,7 +21,7 @@ def train():
 
     for episode in range(100):
 
-        state = env.reset()
+        state, _ = env.reset()
 
         total_reward = 0
 
@@ -28,11 +31,12 @@ def train():
 
             logits = model(state_tensor)
 
-            action = torch.argmax(logits).item()
+            distribution = dist.Categorical(logits=logits)
+            action = distribution.sample()
 
-            next_state, reward, done, _ = env.step(action)
+            next_state, reward, done, truncated, _ = env.step(action.item())
 
-            loss = -torch.tensor(reward)
+            loss = -distribution.log_prob(action) * reward
 
             optimizer.zero_grad()
 
@@ -46,6 +50,7 @@ def train():
 
         print("Episode", episode, "Reward", total_reward)
 
+    os.makedirs("models", exist_ok=True)
     torch.save(model.state_dict(), "models/dispatch_agent.pt")
 
     print("Model saved to models/dispatch_agent.pt")

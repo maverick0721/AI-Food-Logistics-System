@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import numpy as np
 
 
@@ -19,11 +19,13 @@ class DispatchEnvironment(gym.Env):
             shape=(self.state_size,)
         )
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
+
+        super().reset(seed=seed)
 
         self.state = np.random.rand(self.state_size)
 
-        return self.state
+        return self.state, {}
 
     def step(self, action):
 
@@ -33,4 +35,4 @@ class DispatchEnvironment(gym.Env):
 
         next_state = np.random.rand(self.state_size)
 
-        return next_state, reward, done, {}
+        return next_state, reward, done, False, {}
