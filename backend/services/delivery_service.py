@@ -1,28 +1,23 @@
-from backend.streaming.kafka_producer import send_event
-from backend.streaming.topics import ORDER_CREATED
+import torch
 
-def assign_driver(order_id):
+from training.policy_model import PolicyNet
 
-    driver_id = order_id % 10
 
-    # Send event to Kafka
-    send_event(
+model = PolicyNet()
 
-    ORDER_CREATED,
-
-    {
-
-        "order_id": db_order.id,
-        "user_id": order.user_id,
-        "restaurant_id": order.restaurant_id
-
-    }
-
+model.load_state_dict(
+    torch.load("models/digital_twin_dispatch.pt")
 )
 
-    return {
+model.eval()
 
-        "order_id": order_id,
-        "driver_id": driver_id
 
-    }
+def assign_driver(state):
+
+    x = torch.tensor(state).float()
+
+    logits = model(x)
+
+    action = torch.argmax(logits).item()
+
+    return action
