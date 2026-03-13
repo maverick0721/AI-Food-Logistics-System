@@ -21,6 +21,7 @@ cd AI-Food-Logistics-System
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
+pip install -m requirements.txt
 
 ./scripts/start_full_system.sh
 
