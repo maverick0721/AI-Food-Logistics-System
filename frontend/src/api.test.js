@@ -6,7 +6,7 @@ jest.mock("axios", () => ({
 }));
 
 import axios from "axios";
-import { createOrder, getRestaurants, getRecommendation } from "./api";
+import { createOrder, getRestaurants, getRecommendation, getDashboardMetrics } from "./api";
 
 const apiClient = axios.create.mock.results[0].value;
 
@@ -39,5 +39,13 @@ describe("frontend api client", () => {
     await getRecommendation(5, 9);
 
     expect(apiClient.get).toHaveBeenCalledWith("/recommend?user_id=5&restaurant_id=9");
+  });
+
+  test("getDashboardMetrics sends GET /metrics/dashboard", async () => {
+    apiClient.get.mockResolvedValue({ data: {} });
+
+    await getDashboardMetrics();
+
+    expect(apiClient.get).toHaveBeenCalledWith("/metrics/dashboard");
   });
 });

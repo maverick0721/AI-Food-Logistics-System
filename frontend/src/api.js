@@ -12,3 +12,5 @@ export const getRestaurants = () => API.get("/restaurants");
 
 export const getRecommendation = (user, restaurant) =>
   API.get(`/recommend?user_id=${user}&restaurant_id=${restaurant}`);
+
+export const getDashboardMetrics = () => API.get("/metrics/dashboard");

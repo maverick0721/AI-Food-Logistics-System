@@ -19,20 +19,22 @@ function RestaurantList() {
 
   return (
 
-    <div>
-
+    <div className="module">
       <h2>Restaurants</h2>
+      <p className="module-subtitle">Live directory synced from your backend API.</p>
 
-      <ul>
-
-        {restaurants.map((r, i) => (
-
-          <li key={i}>{r.name} ({r.cuisine})</li>
-
-        ))}
-
-      </ul>
-
+      {restaurants.length === 0 ? (
+        <p className="muted-text">No restaurants yet.</p>
+      ) : (
+        <ul className="restaurant-list">
+          {restaurants.map((r, i) => (
+            <li key={i} className="restaurant-item">
+              <span className="restaurant-name">{r.name}</span>
+              <span className="restaurant-chip">{r.cuisine}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
 
   );

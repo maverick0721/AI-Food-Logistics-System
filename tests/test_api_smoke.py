@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from backend.main import app
-from backend.routers import delivery_router, order_router, recommendation_router, restaurant_router
+from backend.routers import delivery_router, metrics_router, order_router, recommendation_router, restaurant_router
 
 
 client = TestClient(app)
@@ -82,6 +82,23 @@ def test_dispatch_endpoint(monkeypatch):
     response = client.post("/dispatch/7")
     assert response.status_code == 200
     assert response.json() == 7
+
+
+def test_dashboard_metrics_endpoint(monkeypatch):
+    monkeypatch.setattr(
+        metrics_router,
+        "get_dashboard_metrics",
+        lambda: {
+            "uptime_pct": 99.9,
+            "active_zones": 4,
+            "avg_eta_minutes": 17.5,
+            "stream_lag_ms": 32,
+        },
+    )
+
+    response = client.get("/metrics/dashboard")
+    assert response.status_code == 200
+    assert response.json()["active_zones"] == 4
 
 
 def test_create_order_validation_error():
