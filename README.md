@@ -1,10 +1,44 @@
 # AI Food Logistics System
 
 [![CI](https://github.com/maverick0721/AI-Food-Logistics-System/actions/workflows/ci.yml/badge.svg)](https://github.com/maverick0721/AI-Food-Logistics-System/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.11+-1f6feb?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-0f766e?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-Frontend-0b7285?logo=react&logoColor=white)](https://react.dev/)
+[![Kafka](https://img.shields.io/badge/Kafka-Event%20Streaming-1f2937?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Data%20Store-1d4ed8?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
 An end-to-end experimentation platform for intelligent food delivery operations. The repository combines a FastAPI backend, Kafka-based event flow, PostgreSQL persistence, a React dashboard, and a set of ML and simulation modules for routing, ETA prediction, demand modeling, and dispatch experimentation.
 
 The goal of the project is straightforward: make it easy to model, run, and improve a food logistics system without splitting the work across multiple disconnected repositories.
+
+## Quick Start
+
+If you want the shortest path to a working local system, this is it:
+
+```bash
+git clone https://github.com/maverick0721/AI-Food-Logistics-System.git
+cd AI-Food-Logistics-System
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+./scripts/start_full_system.sh
+
+cd frontend
+npm install
+npm start
+```
+
+Then open:
+
+- Backend API docs: `http://127.0.0.1:8000/docs`
+- Frontend dashboard: `http://127.0.0.1:3000`
+
+To stop backend services when you are done:
+
+```bash
+./scripts/stop_full_system.sh
+```
 
 ## What This Repository Covers
 
@@ -14,6 +48,19 @@ The goal of the project is straightforward: make it easy to model, run, and impr
 - A React dashboard for monitoring, order creation, recommendation checks, and map-based awareness
 - Research modules for graph routing, ETA prediction, demand forecasting, RL dispatch, and simulation
 - CI checks for backend tests, import integrity, frontend tests, and frontend production builds
+
+## Feature Snapshot
+
+| Area | What it does | Current role in the repo |
+| --- | --- | --- |
+| FastAPI backend | Exposes operational APIs for orders, restaurants, dispatch, recommendation, and metrics | Core runtime service |
+| Kafka streaming | Publishes and consumes order events | Event-driven workflow backbone |
+| PostgreSQL | Stores operational entities | Primary persistence layer |
+| React dashboard | Provides an operator-facing control surface | Local UI and monitoring console |
+| Graph engine | Supports routing and graph-aware modeling | Research and optimization module |
+| RL dispatch | Learns or evaluates dispatch strategies | Decision experimentation |
+| Simulation layer | Generates large-scale operating scenarios | Training and benchmarking support |
+| CI workflow | Tests backend, imports, and frontend build stability | Quality guardrail |
 
 ## System At A Glance
 
@@ -184,6 +231,18 @@ The frontend is designed as a lightweight operations console rather than a marke
 - Restaurant list overview
 - Delivery map panel with safe fallback behavior if the map cannot initialize
 
+## Dashboard Preview
+
+The dashboard is structured as an operations surface, not a landing page. It is designed to feel crisp and focused under real usage:
+
+- a left navigation rail for quick section access
+- live KPI cards backed by backend metrics
+- a day/night theme switch for different viewing conditions
+- a map-led top section for spatial context
+- compact panels for orders, restaurants, and recommendation checks
+
+If you want to publish the repository publicly, this section is the right place to add one or two screenshots of the running UI once you capture them locally.
+
 ## API Surface
 
 Key endpoints currently exposed by the backend:
@@ -242,6 +301,16 @@ This codebase is opinionated in a useful way:
 - Prefer clear local scripts for development before optimizing deployment paths
 - Test the system at the seams: API, events, imports, and frontend build stability
 
+## Why The Architecture Looks Like This
+
+This repository is intentionally not split into separate backend, frontend, and research repositories. That tradeoff is deliberate.
+
+Keeping the serving layer, event flow, simulator, and model code in one place makes iteration faster when the system is still evolving. If the dispatch policy changes, the API contract, consumer behavior, training loop, and dashboard usually need to evolve together. In practice, that coupling is easier to manage in one repository than across several loosely coordinated ones.
+
+Kafka is used where asynchronous flow matters, not as decoration. The backend owns request-time operations, PostgreSQL owns state, and Kafka carries event-time transitions. That separation keeps the request path understandable while still allowing downstream consumers to react independently.
+
+The local shell scripts also reflect a practical choice: development should remain possible even in environments where Docker or Kubernetes are unavailable. That is why the repo supports orchestration manifests under `infra/`, but still treats `scripts/start_full_system.sh` as a first-class development path.
+
 ## Roadmap-Friendly Areas
 
 There are several natural directions for expansion:
@@ -251,6 +320,65 @@ There are several natural directions for expansion:
 - stronger simulator-to-model feedback loops
 - deeper observability with Prometheus and runtime traces
 - production deployment hardening for containerized environments
+
+## Troubleshooting
+
+### Frontend opens locally but not from your browser
+
+If the React app works on the VM but not from your own browser, the most common issue is network reachability rather than application failure.
+
+- `localhost:3000` only works on the machine running the frontend server
+- private addresses such as `10.x.x.x` are usually internal-only
+- if your environment blocks ingress on port `3000`, use port forwarding or an SSH tunnel
+
+Useful checks:
+
+```bash
+curl -I http://127.0.0.1:3000
+ss -ltnp | grep ':3000'
+```
+
+### Kafka broker does not start
+
+The usual cause in constrained cloud environments is listener or hostname misconfiguration.
+
+- prefer explicit localhost listeners
+- verify ZooKeeper is already up before starting Kafka
+- check `infra/kafka/kafka.log` and `infra/kafka/zookeeper.log`
+
+Use:
+
+```bash
+./infra/kafka-start.sh
+./infra/kafka-stop.sh
+```
+
+### FastAPI starts but dispatch fails
+
+This usually points to model-loading or import-time issues in the dispatch path.
+
+- confirm the policy model shape matches the saved checkpoint
+- verify the backend can import `training.policy_model`
+- check the FastAPI log if startup stalls
+
+Useful checks:
+
+```bash
+pytest -q
+python -m compileall -q backend training
+tail -f logs/fastapi.log
+```
+
+### Docker or Kubernetes commands fail in remote environments
+
+That is often an environment limitation rather than a repository issue. Some hosted compute environments do not expose a working Docker daemon, Compose plugin, or Kubernetes runtime.
+
+In those cases, use the local runtime scripts instead:
+
+```bash
+./scripts/start_full_system.sh
+./scripts/stop_full_system.sh
+```
 
 ## License / Usage
 
