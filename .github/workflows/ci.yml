@@ -1,5 +1,9 @@
 name: CI
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -11,6 +15,7 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -33,10 +38,14 @@ jobs:
         run: pip install pytest pyyaml fastapi sqlalchemy kafka-python httpx
 
       - name: Run backend tests
-        run: pytest
+        run: pytest -q --maxfail=1
+
+      - name: Backend syntax check
+        run: python -m compileall -q backend
 
       - name: Backend import sweep
         run: |
+          set -euo pipefail
           python - <<'PY'
           import importlib, pkgutil
 
@@ -66,6 +75,7 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -79,11 +89,11 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: npm ci --no-audit
         working-directory: frontend
 
       - name: Run frontend tests
-        run: CI=true npm test -- --watchAll=false
+        run: CI=true npm test -- --watchAll=false --runInBand
         working-directory: frontend
 
       - name: Build frontend

@@ -82,3 +82,28 @@ def test_dispatch_endpoint(monkeypatch):
     response = client.post("/dispatch/7")
     assert response.status_code == 200
     assert response.json() == 7
+
+
+def test_create_order_validation_error():
+    response = client.post("/orders", json={"user_id": 1, "restaurant_id": 1})
+    assert response.status_code == 422
+
+
+def test_recommend_validation_error_missing_query_params():
+    response = client.get("/recommend")
+    assert response.status_code == 422
+
+
+def test_dispatch_validation_error_invalid_order_id_type():
+    response = client.post("/dispatch/not-an-int")
+    assert response.status_code == 422
+
+
+def test_orders_internal_error_response(monkeypatch):
+    def _raise_error(_order):
+        raise RuntimeError("db unavailable")
+
+    monkeypatch.setattr(order_router, "create_order", _raise_error)
+    local_client = TestClient(app, raise_server_exceptions=False)
+    response = local_client.post("/orders", json={"user_id": 1, "restaurant_id": 1, "item": "burger"})
+    assert response.status_code == 500
