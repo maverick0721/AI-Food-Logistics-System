@@ -1,70 +1,43 @@
 import torch
-import torch.nn as nn
 import torch.optim as optim
 
 from digital_twin.rl_env import LogisticsEnv
+from training.policy_model import PolicyNet
 
 
-class PolicyNet(nn.Module):
+def main():
+    env = LogisticsEnv()
+    model = PolicyNet()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    def __init__(self):
+    for episode in range(100):
+        state = env.reset()
+        total_reward = 0
 
-        super().__init__()
+        for _ in range(24):
+            state_tensor = torch.tensor(state).float()
+            logits = model(state_tensor)
+            probs = torch.softmax(logits, dim=0)
+            action = torch.multinomial(probs, 1).item()
 
-        self.net = nn.Sequential(
+            next_state, reward, done, _ = env.step(action)
+            log_prob = torch.log(probs[action] + 1e-8)
+            loss = -log_prob * reward
 
-            nn.Linear(10, 64),
-            nn.ReLU(),
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-            nn.Linear(64, 64),
-            nn.ReLU(),
+            state = next_state
+            total_reward += reward
 
-            nn.Linear(64, 50)
+            if done:
+                break
 
-        )
+        print("Episode:", episode, "Reward:", total_reward)
 
-    def forward(self, x):
-
-        return self.net(x)
-
-
-env = LogisticsEnv()
-
-model = PolicyNet()
-
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+    torch.save(model.state_dict(), "models/digital_twin_dispatch.pt")
 
 
-for episode in range(100):
-
-    state = env.reset()
-
-    total_reward = 0
-
-    for step in range(24):
-
-        state_tensor = torch.tensor(state).float()
-
-        logits = model(state_tensor)
-
-        probs = torch.softmax(logits, dim=0)
-
-        action = torch.multinomial(probs, 1).item()
-
-        next_state, reward, done, _ = env.step(action)
-
-        log_prob = torch.log(probs[action] + 1e-8)
-
-        loss = -log_prob * reward
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        state = next_state
-
-        total_reward += reward
-
-    print("Episode:", episode, "Reward:", total_reward)
-
-torch.save(model.state_dict(), "models/digital_twin_dispatch.pt")
+if __name__ == "__main__":
+    main()

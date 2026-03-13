@@ -2,8 +2,6 @@ import ray
 import pandas as pd
 import random
 
-ray.init()
-
 
 @ray.remote
 class ZoneSimulator:
@@ -31,6 +29,7 @@ class ZoneSimulator:
 
 
 def main():
+    ray.init(ignore_reinit_error=True)
 
     # Create zone simulators
     zones = [ZoneSimulator.remote(i) for i in range(10)]
