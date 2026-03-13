@@ -20,6 +20,10 @@ def get_producer():
 
 
 def send_event(topic, data):
-    p = get_producer()
-    p.send(topic, data)
-    p.flush()
+    try:
+        p = get_producer()
+        p.send(topic, data)
+        p.flush()
+    except Exception as exc:
+        # Keep core API operations available when Kafka is offline.
+        print(f"[kafka-producer] skipping event publish: {exc}", flush=True)

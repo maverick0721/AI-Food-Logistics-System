@@ -5,9 +5,15 @@ from backend.routers import restaurant_router
 from backend.routers import delivery_router
 from backend.routers import recommendation_router
 from backend.routers import metrics_router
+from backend.database.init_db import init_db
 
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def startup_event():
+    init_db()
 
 app.include_router(order_router.router)
 app.include_router(restaurant_router.router)

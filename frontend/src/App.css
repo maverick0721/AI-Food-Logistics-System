@@ -64,18 +64,19 @@ body {
 .dashboard-shell {
     display: grid;
     gap: 20px;
-    grid-template-columns: 84px 1fr;
+    grid-template-columns: 156px 1fr;
     align-items: start;
 }
 
 .left-rail {
     position: sticky;
     top: 24px;
+    transform: translateX(-44px);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    padding: 14px 10px;
+    padding: 16px 14px;
     border: 1px solid var(--line);
     background: var(--rail-bg);
     border-radius: 20px;
@@ -100,11 +101,11 @@ body {
 .rail-link {
     text-decoration: none;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    padding: 8px 6px;
+    padding: 10px 12px;
     border-radius: 10px;
     transition: color 0.2s ease, background-color 0.2s ease;
 }
@@ -466,6 +467,7 @@ input:focus {
     .left-rail {
         position: relative;
         top: 0;
+        transform: none;
         flex-direction: row;
         justify-content: center;
         flex-wrap: wrap;

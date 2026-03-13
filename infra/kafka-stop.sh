@@ -11,7 +11,19 @@ stop_by_pattern() {
 wait_port_closed() {
 	local port="$1"
 	for _ in $(seq 1 20); do
-		if ! ss -ltnp | grep -q ":${port} "; then
+		if python - "$port" <<'PY'
+import socket
+import sys
+
+port = int(sys.argv[1])
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.settimeout(0.4)
+try:
+    sys.exit(0 if s.connect_ex(("127.0.0.1", port)) != 0 else 1)
+finally:
+    s.close()
+PY
+		then
 			return 0
 		fi
 		sleep 1

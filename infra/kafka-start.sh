@@ -1,13 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-KAFKA_DIR="$(cd "$(dirname "$0")/kafka/current" && pwd)"
-LOG_DIR="$(cd "$(dirname "$0")/kafka" && pwd)"
+KAFKA_CURRENT_DIR="$(dirname "$0")/kafka/current"
+KAFKA_LOG_DIR="$(dirname "$0")/kafka"
+
+if [ ! -d "$KAFKA_CURRENT_DIR" ]; then
+    echo "[kafka-start] Kafka binaries not found at $KAFKA_CURRENT_DIR. Skipping Kafka startup."
+    exit 0
+fi
+
+KAFKA_DIR="$(cd "$KAFKA_CURRENT_DIR" && pwd)"
+LOG_DIR="$(cd "$KAFKA_LOG_DIR" && pwd)"
 
 wait_port_open() {
     local port="$1"
     for _ in $(seq 1 30); do
-        if ss -ltnp | grep -q ":${port} "; then
+        if python - "$port" <<'PY'
+import socket
+import sys
+
+port = int(sys.argv[1])
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.settimeout(0.4)
+try:
+    sys.exit(0 if s.connect_ex(("127.0.0.1", port)) == 0 else 1)
+finally:
+    s.close()
+PY
+        then
             return 0
         fi
         sleep 1

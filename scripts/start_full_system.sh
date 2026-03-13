@@ -10,7 +10,19 @@ mkdir -p "$LOG_DIR" "$PID_DIR"
 wait_port_open() {
     local port="$1"
     for _ in $(seq 1 30); do
-        if ss -ltnp | grep -q ":${port} "; then
+        if python - "$port" <<'PY'
+import socket
+import sys
+
+port = int(sys.argv[1])
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.settimeout(0.4)
+try:
+    sys.exit(0 if s.connect_ex(("127.0.0.1", port)) == 0 else 1)
+finally:
+    s.close()
+PY
+        then
             return 0
         fi
         sleep 1
@@ -21,7 +33,7 @@ wait_port_open() {
 start_postgres() {
     echo "[full-start] Ensuring PostgreSQL is running..."
 
-    if pg_isready -q; then
+    if command -v pg_isready >/dev/null 2>&1 && pg_isready -q; then
         echo "[full-start] PostgreSQL is already running."
         return 0
     fi
@@ -30,7 +42,7 @@ start_postgres() {
         systemctl start postgresql >/dev/null 2>&1 || true
     fi
 
-    if ! pg_isready -q && command -v service >/dev/null 2>&1; then
+    if command -v pg_isready >/dev/null 2>&1 && ! pg_isready -q && command -v service >/dev/null 2>&1; then
         service postgresql start >/dev/null 2>&1 || true
     fi
 
@@ -45,7 +57,7 @@ start_postgres() {
 stop_port_holder() {
     local port="$1"
     local pids
-    pids="$(ss -ltnp 2>/dev/null | awk -v p=":${port}" '$4 ~ p {print $0}' | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' | sort -u)"
+    pids="$(lsof -ti tcp:${port} 2>/dev/null | sort -u || true)"
     if [ -n "$pids" ]; then
         echo "[full-start] Releasing port ${port} from existing process(es): $pids"
         kill $pids || true
@@ -101,7 +113,13 @@ if ! pgrep -f "backend/streaming/dispatch_consumer.py" > /dev/null 2>&1; then
 fi
 
 echo "[full-start] Service status:"
-ss -ltnp | grep -E ':5432|:8000|:9092' || true
+for port in 5432 8000 9092; do
+    if wait_port_open "$port"; then
+        echo "  - port ${port}: open"
+    else
+        echo "  - port ${port}: closed"
+    fi
+done
 
 echo
 

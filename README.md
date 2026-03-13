@@ -13,6 +13,28 @@ The goal of the project is straightforward: make it easy to model, run, and impr
 
 ## Quick Start
 
+### One-Command Interview Demo (Recommended)
+
+From a fresh clone, run one command:
+
+```bash
+./scripts/bootstrap_and_start.sh
+```
+
+This command will:
+
+- install missing system dependencies (Ubuntu/Debian via apt)
+- create `.venv` and install Python packages
+- download and configure local Kafka binaries (if missing)
+- start PostgreSQL and initialize `food_app` / `food_delivery_ai`
+- start Kafka, ZooKeeper, FastAPI, dispatch consumer, and React frontend
+
+To stop everything:
+
+```bash
+./scripts/stop_demo.sh
+```
+
 If you want the shortest path to a working local system, this is it:
 
 ```bash
