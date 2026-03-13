@@ -370,17 +370,29 @@ python -m compileall -q backend training
 tail -f logs/fastapi.log
 ```
 
-### Docker or Kubernetes commands fail in remote environments
+### Docker Compose deployment
 
-That is often an environment limitation rather than a repository issue. Some hosted compute environments do not expose a working Docker daemon, Compose plugin, or Kubernetes runtime.
-
-In those cases, use the local runtime scripts instead:
+If your target environment provides a working Docker daemon and Compose plugin, the repository can be started with the compose definition under `infra/`.
 
 ```bash
-./scripts/start_full_system.sh
-./scripts/stop_full_system.sh
+docker compose -f infra/docker-compose.yml up --build
+docker compose -f infra/docker-compose.yml down
 ```
 
-## License / Usage
+### Kubernetes deployment
 
-Add your preferred license here if you intend to open-source the project publicly.
+If you are deploying to a Kubernetes-capable environment, apply the manifests under `infra/kubernetes/`.
+
+```bash
+kubectl apply -f infra/kubernetes/
+kubectl get pods
+kubectl get services
+```
+
+### Hosted sandbox limitation
+
+Some hosted notebook or sandbox environments do not expose a usable Docker daemon, Compose plugin, or Kubernetes runtime even when the configuration files are correct. In those environments, container commands may fail for infrastructure reasons rather than repository issues.
+
+## License
+
+Personal Usecase
