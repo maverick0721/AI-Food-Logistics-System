@@ -35,7 +35,7 @@ jobs:
             ${{ runner.os }}-pip-backend-
 
       - name: Install backend test dependencies
-        run: pip install pytest pyyaml fastapi sqlalchemy kafka-python httpx
+        run: pip install pytest pyyaml fastapi sqlalchemy kafka-python httpx psycopg2-binary requests
 
       - name: Run backend tests
         run: pytest -q --maxfail=1
