@@ -1,5 +1,5 @@
 absl-py==2.4.0
--e git+https://github.com/maverick0721/AI-Food-Logistics-System.git@ad4b64ce2662efc290eecee5e20e949983ee5b61#egg=ai_food_logistics
+-e git+https://github.com/maverick0721/AI-Food-Logistics-System.git@09801cee02f182ae416768df6494d64b174e5f0c#egg=ai_food_logistics
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.3
 aiosignal==1.4.0
