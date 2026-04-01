@@ -6,6 +6,9 @@
 [![React](https://img.shields.io/badge/React-Frontend-0b7285?logo=react&logoColor=white)](https://react.dev/)
 [![Kafka](https://img.shields.io/badge/Kafka-Event%20Streaming-1f2937?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Data%20Store-1d4ed8?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Mapbox](https://img.shields.io/badge/Mapbox-Delivery%20Map-1f2937?logo=mapbox&logoColor=white)](https://www.mapbox.com/)
+[![Healthcheck](https://img.shields.io/badge/Healthcheck-One%20Command-0f766e)](#testing-and-quality-checks)
+[![UI Flow](https://img.shields.io/badge/Demo-Restaurant%20%E2%86%92%20Order%20%E2%86%92%20Score-15803d)](#interview-demo-flow)
 
 An end-to-end experimentation platform for intelligent food delivery operations. The repository combines a FastAPI backend, Kafka-based event flow, PostgreSQL persistence, a React dashboard, and a set of ML and simulation modules for routing, ETA prediction, demand modeling, and dispatch experimentation.
 
@@ -43,7 +46,7 @@ cd AI-Food-Logistics-System
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
-pip install -m requirements.txt
+pip install -r requirements.txt
 
 ./scripts/start_full_system.sh
 
@@ -62,6 +65,33 @@ To stop backend services when you are done:
 ```bash
 ./scripts/stop_full_system.sh
 ```
+
+## Demo Flow
+
+1. Add a restaurant in the **Restaurants** panel (supply onboarding)
+2. Create an order in **Create Order** using restaurant **name** (demand intake)
+3. Check **Recommendation Score** for user + restaurant (decision signal)
+
+```mermaid
+flowchart LR
+	R[Add Restaurant] --> O[Create Order]
+	O --> DB[(PostgreSQL)]
+	O --> K[(Kafka ORDER_CREATED)]
+	K --> C[Dispatch Consumer]
+	O --> S[Check Recommendation Score]
+
+	style R fill:#d5f5e3,stroke:#1e8449
+	style O fill:#ebf5fb,stroke:#2471a3
+	style S fill:#f4ecf7,stroke:#7d3c98
+	style DB fill:#fdf2e9,stroke:#ca6f1e
+	style K fill:#fdf2e9,stroke:#ca6f1e
+```
+
+Why this sequence matters:
+
+- **Restaurants** validates DB-backed supply state
+- **Create Order** validates API + persistence + event streaming
+- **Recommendation Score** validates ML-backed decision interface
 
 ## What This Repository Covers
 
@@ -238,11 +268,14 @@ npm start
 
 The dashboard runs on port `3000` by default.
 
-For Mapbox rendering, define a token in `frontend/.env`:
+For Mapbox rendering, define a token in the project root `.env`:
 
 ```bash
+cp .env.example .env
 REACT_APP_MAPBOX_TOKEN=your_public_mapbox_token
 ```
+
+Then restart backend + frontend so both services pick up the value.
 
 ## Frontend Experience
 
@@ -276,8 +309,11 @@ Key endpoints currently exposed by the backend:
 - `GET /restaurants`
 - `POST /restaurants`
 - `GET /recommend?user_id=...&restaurant_id=...`
+- `GET /config/mapbox-token`
 - `POST /dispatch/{order_id}`
 - `GET /metrics/dashboard`
+
+Note: the frontend now uses restaurant **name** selectors in the Create Order and Recommendation panels, and maps each selection to its backend `restaurant_id` internally.
 
 ## Testing and Quality Checks
 
@@ -299,6 +335,19 @@ Frontend production build:
 ```bash
 cd frontend
 npm run build
+```
+
+If you are building with Node 17+ and see `ERR_OSSL_EVP_UNSUPPORTED`, run:
+
+```bash
+cd frontend
+NODE_OPTIONS=--openssl-legacy-provider npm run build
+```
+
+One-command healthcheck (backend tests + import sweep + API probe + frontend checks):
+
+```bash
+./scripts/healthcheck_all.sh
 ```
 
 The CI workflow runs:
@@ -391,6 +440,19 @@ pytest -q
 python -m compileall -q backend training
 tail -f logs/fastapi.log
 ```
+
+### Frontend build fails with `ERR_OSSL_EVP_UNSUPPORTED`
+
+This is a Node/OpenSSL compatibility issue common with older CRA/webpack stacks on newer Node versions.
+
+Use:
+
+```bash
+cd frontend
+NODE_OPTIONS=--openssl-legacy-provider npm run build
+```
+
+The CI workflow already applies this compatibility flag for the frontend build step.
 
 ### Docker Compose deployment
 
