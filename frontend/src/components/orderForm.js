@@ -1,18 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { createOrder } from "../api";
+import { createOrder, getRestaurants } from "../api";
 
 
 function OrderForm() {
 
   const [user, setUser] = useState("");
-  const [restaurant, setRestaurant] = useState("");
+  const [restaurantId, setRestaurantId] = useState("");
   const [item, setItem] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [restaurants, setRestaurants] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRestaurants = async () => {
+      try {
+        const res = await getRestaurants();
+        const list = res?.data || [];
+        if (!cancelled) {
+          setRestaurants(list);
+          if (list.length > 0) {
+            setRestaurantId(String(list[0].id));
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setRestaurants([]);
+        }
+      }
+    };
+
+    loadRestaurants();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const submit = async () => {
-    if (!user || !restaurant || !item) {
+    if (!user || !restaurantId || !item) {
       setMessage("Fill all fields before creating the order.");
       return;
     }
@@ -22,7 +50,7 @@ function OrderForm() {
     try {
       await createOrder({
         user_id: parseInt(user, 10),
-        restaurant_id: parseInt(restaurant, 10),
+        restaurant_id: parseInt(restaurantId, 10),
         item: item
       });
       setMessage("Order created successfully.");
@@ -48,8 +76,18 @@ function OrderForm() {
         </label>
 
         <label>
-          Restaurant ID
-          <input value={restaurant} placeholder="e.g. 2" onChange={e => setRestaurant(e.target.value)} />
+          Restaurant Name
+          <select value={restaurantId} onChange={e => setRestaurantId(e.target.value)}>
+            {restaurants.length === 0 ? (
+              <option value="">No restaurants available</option>
+            ) : (
+              restaurants.map(r => (
+                <option key={r.id} value={String(r.id)}>
+                  {r.name}
+                </option>
+              ))
+            )}
+          </select>
         </label>
 
         <label className="label-wide">

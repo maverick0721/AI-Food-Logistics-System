@@ -5,6 +5,7 @@ jest.mock("./api", () => ({
   createOrder: jest.fn(),
   getRestaurants: jest.fn(() => Promise.resolve({ data: [] })),
   getRecommendation: jest.fn(() => Promise.resolve({ data: { score: 0 } })),
+  getMapboxToken: jest.fn(() => Promise.resolve({ data: { token: "" } })),
   getDashboardMetrics: jest.fn(() =>
     Promise.resolve({
       data: {

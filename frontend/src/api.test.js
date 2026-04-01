@@ -6,7 +6,14 @@ jest.mock("axios", () => ({
 }));
 
 import axios from "axios";
-import { createOrder, getRestaurants, getRecommendation, getDashboardMetrics } from "./api";
+import {
+  createOrder,
+  createRestaurant,
+  getRestaurants,
+  getRecommendation,
+  getDashboardMetrics,
+  getMapboxToken
+} from "./api";
 
 const apiClient = axios.create.mock.results[0].value;
 
@@ -33,6 +40,15 @@ describe("frontend api client", () => {
     expect(apiClient.get).toHaveBeenCalledWith("/restaurants");
   });
 
+  test("createRestaurant sends POST /restaurants with payload", async () => {
+    apiClient.post.mockResolvedValue({ data: { id: 1 } });
+    const payload = { name: "Green Bowl", cuisine: "Healthy" };
+
+    await createRestaurant(payload);
+
+    expect(apiClient.post).toHaveBeenCalledWith("/restaurants", payload);
+  });
+
   test("getRecommendation sends GET with query params", async () => {
     apiClient.get.mockResolvedValue({ data: { score: 0.5 } });
 
@@ -47,5 +63,13 @@ describe("frontend api client", () => {
     await getDashboardMetrics();
 
     expect(apiClient.get).toHaveBeenCalledWith("/metrics/dashboard");
+  });
+
+  test("getMapboxToken sends GET /config/mapbox-token", async () => {
+    apiClient.get.mockResolvedValue({ data: { token: "pk.test" } });
+
+    await getMapboxToken();
+
+    expect(apiClient.get).toHaveBeenCalledWith("/config/mapbox-token");
   });
 });

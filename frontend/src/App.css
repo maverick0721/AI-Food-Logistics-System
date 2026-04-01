@@ -125,6 +125,7 @@ body {
     filter: blur(60px);
     z-index: 0;
     opacity: 0.5;
+    pointer-events: none;
 }
 
 .ambient-left {
@@ -322,7 +323,8 @@ label {
     color: var(--muted);
 }
 
-input {
+input,
+select {
     border: 1px solid var(--line);
     border-radius: 12px;
     background: var(--input-bg);
@@ -333,7 +335,8 @@ input {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-input:focus {
+input:focus,
+select:focus {
     border-color: var(--accent);
     outline: none;
     box-shadow: 0 0 0 3px rgba(31, 122, 74, 0.15);
@@ -378,7 +381,7 @@ input:focus {
 
 .restaurant-list {
     list-style: none;
-    margin: 0;
+    margin: 12px 0 0;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -432,6 +435,29 @@ input:focus {
     border-radius: 14px;
     border: 1px solid var(--line);
     overflow: hidden;
+}
+
+.map-fallback {
+    min-height: 180px;
+    border-radius: 14px;
+    border: 1px dashed var(--line);
+    background: var(--input-bg);
+    padding: 14px;
+}
+
+.map-env-snippet {
+    margin: 8px 0 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: rgba(16, 22, 15, 0.04);
+    color: var(--text);
+    font-size: 13px;
+    overflow-x: auto;
+}
+
+.app-shell[data-theme="night"] .map-env-snippet {
+    background: rgba(255, 255, 255, 0.06);
 }
 
 @keyframes fadeInUp {
